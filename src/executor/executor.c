@@ -6,5 +6,5 @@ void execute_command(CommandArgs* cmd) {
     if (execute_builtin_command(cmd) == 1) {
         return;
     }
-    printf("%s: command not found", cmd -> argv[0]);
+    printf("%s: command not found\n", cmd -> argv[0]);
 }
