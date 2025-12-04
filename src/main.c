@@ -9,7 +9,10 @@ void exit_shell(CommandArgs* cmd) {
         printf("Too many arguments\n");
         return;
     }
-    int code = atoi(cmd -> argv[1]);
+    int code = 0;
+    if(cmd -> argv[1]) {
+        code = atoi(cmd -> argv[1]);
+    }
     exit(code);
 }
 
