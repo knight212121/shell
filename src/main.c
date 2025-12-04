@@ -42,7 +42,8 @@ int main(int argc, char *argv[]) {
                 echo(cmd);
             }
             else {
-                printf("%s: command not found", cmd -> argv[0]);
+                printf("%s: command not found\n", cmd -> argv[0]);
+                break;
             }
         }
 
