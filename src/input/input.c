@@ -1,0 +1,113 @@
+#include "input.h"
+#include <stdlib.h>
+#include <string.h>
+
+char *trim_whitespace(char *str) {
+    while (*str == ' ')
+        str++;
+
+    if (*str == 0)
+        return str;
+
+    char *end = str + strlen(str) - 1;
+
+    while (end > str && *end == ' ') {
+        *end = 0;
+        end--;
+    }
+
+    return str;
+}
+
+CommandArgs *tokenize_input(const char *input) {
+    if (!input || *input == '\0') {
+        CommandArgs *cmd = malloc(sizeof(CommandArgs));
+        if (!cmd)
+            return NULL;
+
+        cmd->argc = 0;
+        cmd->argv = malloc(sizeof(char *));
+        if (!cmd->argv) {
+            free(cmd);
+            return NULL;
+        }
+        cmd->argv[0] = NULL;
+        return cmd;
+    }
+
+    char *copy = strdup(input);
+    if (!copy)
+        return NULL;
+
+    char *trimmed = trim_whitespace(copy);
+    if (*trimmed == '\0') {
+        free(copy);
+        CommandArgs *cmd = malloc(sizeof(CommandArgs));
+        if (!cmd)
+            return NULL;
+
+        cmd->argc = 0;
+        cmd->argv = malloc(sizeof(char *));
+        if (!cmd->argv) {
+            free(cmd);
+            return NULL;
+        }
+        cmd->argv[0] = NULL;
+        return cmd;
+    }
+
+    size_t len = strlen(trimmed);
+    CommandArgs *cmd = malloc(sizeof(CommandArgs));
+    if (!cmd) {
+        free(copy);
+        return NULL;
+    }
+
+    cmd->argv = malloc((len + 2) * sizeof(char *));
+    if (!cmd->argv) {
+        free(copy);
+        free(cmd);
+        return NULL;
+    }
+
+    cmd->argc = 0;
+    char *saveptr = NULL;
+    char *token = strtok_r(trimmed, " ", &saveptr);
+
+    while (token) {
+        cmd->argv[cmd->argc] = strdup(token);
+        if (!cmd->argv[cmd->argc]) {
+            for (int i = 0; i < cmd->argc; i++)
+                free(cmd->argv[i]);
+            free(cmd);
+            free(copy);
+            free(cmd->argv);
+            return NULL;
+        }
+        cmd -> argc++;
+        token = strtok_r(NULL, " ", &saveptr);
+    }
+
+    cmd -> argv[cmd -> argc] = NULL;
+
+    if (cmd -> argc > 0 && cmd -> argc < len) {
+        char **trimmed_argv = realloc(cmd -> argv, (cmd -> argc + 1) * sizeof(char*));
+        if (trimmed_argv) {
+            cmd -> argv = trimmed_argv;
+        }
+    }
+
+    free(copy);
+    return cmd;
+}
+
+void free_command_args(CommandArgs* cmd) {
+    if (!cmd) return;
+
+    if (cmd -> argv) {
+        for(int i = 0; i < cmd -> argc; i++)
+            free(cmd -> argv[i]);
+        free(cmd -> argv);
+    }
+    free(cmd);
+}

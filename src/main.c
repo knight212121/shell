@@ -1,10 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "utils/common.h"
+#include "input/input.h"
 
-void exit_shell(char* status) {
-    int code = atoi(status);
+void exit_shell(CommandArgs* cmd) {
+    if (cmd -> argc > 2) {
+        printf("Too many arguments\n");
+        return;
+    }
+    int code = atoi(cmd -> argv[1]);
     exit(code);
+}
+
+void echo(CommandArgs* cmd) {
+    for(int i = 1; i < cmd -> argc; i += 1) {
+        printf("%s ", cmd -> argv[i]);
+    }
+    printf("\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -19,18 +32,20 @@ int main(int argc, char *argv[]) {
 
         command[strcspn(command, "\n")] = '\0';
 
-        char *rest = command, *token;
-        char *executable = strtok_r(rest, " ", &rest), *args;
+        CommandArgs* cmd = tokenize_input(command);
 
-        while((token = strtok_r(rest, " ", &rest))) {
-            args = token;
+        if(cmd) {
+            if (strcmp(cmd -> argv[0], "exit") == 0) {
+                exit_shell(cmd);
+            }
+            else if(strcmp(cmd -> argv[0], "echo") == 0) {
+                echo(cmd);
+            }
+            else {
+                printf("%s: command not found", cmd -> argv[0]);
+            }
         }
 
-        if (strcmp(executable, "exit") == 0) {
-            exit_shell(args);
-        }
-
-        printf("%s: command not found\n", command);
     }
 
     return 0;
