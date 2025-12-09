@@ -15,4 +15,10 @@ typedef struct {
 extern ShellCommand commands[];
 extern int command_count;
 
+#ifdef _WIN32
+#define PATH_LIST_SEPARATOR ";"
+#else
+#define PATH_LIST_SEPARATOR ":"
+#endif
+
 #endif
