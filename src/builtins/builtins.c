@@ -7,6 +7,16 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+void cd(CommandArgs* cmd) {
+    if (cmd->argc > 2) {
+        printf("cd: too many arguments\n");
+        return;
+    }
+    if (chdir(cmd->argv[1]) == -1) {
+        printf("cd: %s: No such file or directory\n", cmd->argv[1]);
+    }
+}
+
 void exit_shell(CommandArgs *cmd) {
     if (cmd->argc > 2) {
         printf("Too many arguments\n");
@@ -98,6 +108,7 @@ ShellCommand commands[] = {
     {"exit", exit_shell},
     {"type", type},
     {"pwd", pwd},
+    {"cd", cd},
 };
 
 int command_count = sizeof(commands) / sizeof(commands[0]);
