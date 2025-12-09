@@ -1,10 +1,11 @@
 #include "builtins.h"
 #include <dirent.h>
-#include <unistd.h>
+#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 void exit_shell(CommandArgs *cmd) {
     if (cmd->argc > 2) {
@@ -48,14 +49,17 @@ void type(CommandArgs *cmd) {
                     if (dir == NULL) {
                         continue;
                     }
-                    while((entry = readdir(dir)) != NULL) {
+                    while ((entry = readdir(dir)) != NULL) {
                         if (strcmp(entry->d_name, cmd->argv[i]) == 0) {
-                            char* full_path = malloc(strlen(target_dir)+2+strlen(entry->d_name));
+                            char *full_path = malloc(strlen(target_dir) + 2 +
+                                                     strlen(entry->d_name));
                             if (full_path == NULL) {
                                 continue;
                             }
                             strcpy(full_path, target_dir);
-                            strcat(full_path, "/");  // Probably add windows compatibility for forward slash
+                            strcat(full_path,
+                                   "/"); // Probably add windows compatibility
+                                         // for forward slash
                             strcat(full_path, entry->d_name);
                             if (access(full_path, X_OK) != -1) {
                                 printf("%s is %s\n", cmd->argv[i], full_path);
@@ -80,10 +84,20 @@ void type(CommandArgs *cmd) {
     }
 }
 
+void pwd(CommandArgs *cmd) {
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+        printf("%s\n", cwd);
+    else {
+        perror("getcwd() error");
+    }
+}
+
 ShellCommand commands[] = {
     {"echo", echo},
     {"exit", exit_shell},
     {"type", type},
+    {"pwd", pwd},
 };
 
 int command_count = sizeof(commands) / sizeof(commands[0]);
