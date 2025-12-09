@@ -1,6 +1,6 @@
 #include "builtins.h"
 #include <dirent.h>
-#include <errno.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,10 +57,14 @@ void type(CommandArgs *cmd) {
                             strcpy(full_path, target_dir);
                             strcat(full_path, "/");  // Probably add windows compatibility for forward slash
                             strcat(full_path, entry->d_name);
-                            printf("%s is %s\n", cmd->argv[i], full_path);
-                            free(full_path);
-                            found = 1;
-                            break;
+                            if (access(full_path, X_OK) != -1) {
+                                printf("%s is %s\n", cmd->argv[i], full_path);
+                                free(full_path);
+                                found = 1;
+                                break;
+                            } else {
+                                free(full_path);
+                            }
                         }
                     }
                     closedir(dir);
