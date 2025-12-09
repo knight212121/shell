@@ -1,10 +1,75 @@
 #include "executor.h"
 #include "../builtins/builtins.h"
+#include <dirent.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
-void execute_command(CommandArgs* cmd) {
-    if (execute_builtin_command(cmd) == 1) {
-        return;
+enum { BUF_SIZE = 4096 };
+
+char* find_external_command(char *name) {
+    char *PATH = strdup(getenv("PATH"));
+    if (PATH) {
+        char *save_ptr = NULL;
+        char *target_dir = strtok_r(PATH, PATH_LIST_SEPARATOR, &save_ptr);
+        while (target_dir) {
+            struct dirent *entry;
+            DIR *dir = opendir(target_dir);
+            if (dir == NULL) {
+                continue;
+            }
+            while ((entry = readdir(dir)) != NULL) {
+                if (strcmp(entry->d_name, name) == 0) {
+                    char *full_path =
+                        malloc(strlen(target_dir) + 2 + strlen(entry->d_name));
+                    if (full_path == NULL) {
+                        continue;
+                    }
+                    strcpy(full_path, target_dir);
+                    strcat(full_path,
+                           "/"); // Add windows compatibility for forward slash
+                    strcat(full_path, entry->d_name);
+                    if (access(full_path, X_OK) != -1) {
+                        return full_path;
+                        break;
+                    } else {
+                        free(full_path);
+                    }
+                }
+            }
+            closedir(dir);
+            target_dir = strtok_r(NULL, PATH_LIST_SEPARATOR, &save_ptr);
+        }
     }
-    printf("%s: command not found\n", cmd -> argv[0]);
+    return NULL;
+}
+
+int execute_external_command(CommandArgs *cmd) {
+    char *executable = find_external_command(cmd->argv[0]);
+    if (executable) {
+        pid_t pid = fork();
+        if (pid < 0) {
+            perror("fork fail");
+            exit(1);
+        } else if (pid == 0) {
+            static char *env_args[] = { NULL };
+            execve(executable, cmd->argv, env_args);
+            perror("execve");
+        } else {
+            wait(NULL);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+void execute_command(CommandArgs *cmd) {
+    if (execute_builtin_command(cmd) == 1)
+        return;
+    if (execute_external_command(cmd) == 1)
+        return;
+    printf("%s: command not found\n", cmd->argv[0]);
 }
