@@ -12,9 +12,21 @@ void cd(CommandArgs* cmd) {
         printf("cd: too many arguments\n");
         return;
     }
-    if (chdir(cmd->argv[1]) == -1) {
-        printf("cd: %s: No such file or directory\n", cmd->argv[1]);
+    char* full_path;
+    if (cmd->argv[1][0] == '~') {
+        cmd->argv[1]++;
+        char* home = getenv("HOME");
+        full_path = (char*) malloc(strlen(home) + strlen(cmd->argv[1]));
+        strcpy(full_path, home);
+        strcat(full_path, cmd->argv[1]);
+    } else {
+        full_path = strdup(cmd->argv[1]);
     }
+
+    if (chdir(full_path) == -1) {
+        printf("cd: %s: No such file or directory\n", full_path);
+    }
+    free(full_path);
 }
 
 void exit_shell(CommandArgs *cmd) {
