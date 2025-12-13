@@ -31,6 +31,7 @@ void make_tokens(CommandArgs *cmd, const char *input) {
     while (input[i] != '\0') {
         if (input[i] == '\\') {
             if (input[i + 1] != '\0') {
+                buffer[buf_idx++] = '\\';
                 buffer[buf_idx++] = input[i + 1];
                 i += 2;
                 continue;
