@@ -1,4 +1,5 @@
 #include "input.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,6 +18,62 @@ char *trim_whitespace(char *str) {
     }
 
     return str;
+}
+
+void make_tokens(CommandArgs *cmd, const char *input) {
+    int i = 0, buf_idx = 0;
+    int in_single = 0;
+    cmd->argc = 0;
+    char *buffer = malloc(sizeof(input));
+    if (!buffer)
+        return;
+
+    while (input[i] != '\0') {
+        if (input[i] == '\'') {
+            if (in_single == 1)
+                in_single = 0;
+            else if (in_single == 0)
+                in_single = 1;
+            i++;
+            continue;
+        }
+
+        if (in_single == 0 && input[i] == ' ') {
+            buffer[buf_idx] = '\0';
+            cmd->argv[cmd->argc++] = strdup(buffer);
+            if (!cmd->argv[cmd->argc-1]) {
+                for (int i = 0; i < cmd->argc; i++)
+                    free(cmd->argv[i]);
+                free(cmd);
+                free(cmd->argv);
+                free(buffer);
+                cmd->argc = 0;
+                return;
+            }
+            buf_idx = 0;
+            while (input[i] == ' ')
+                i++;
+            continue;
+        }
+
+        buffer[buf_idx++] = input[i++];
+    }
+
+    if (buffer) {
+        buffer[buf_idx] = '\0';
+        cmd->argv[cmd->argc] = strdup(buffer);
+        if (!cmd->argv[cmd->argc]) {
+            for (int i = 0; i < cmd->argc; i++)
+                free(cmd->argv[i]);
+            free(cmd);
+            free(cmd->argv);
+            free(buffer);
+            cmd->argc = 0;
+            return;
+        }
+        cmd->argc++;
+        free(buffer);
+    }
 }
 
 CommandArgs *tokenize_input(const char *input) {
@@ -70,30 +127,32 @@ CommandArgs *tokenize_input(const char *input) {
         return NULL;
     }
 
-    cmd->argc = 0;
-    char *saveptr = NULL;
-    char *token = strtok_r(trimmed, " ", &saveptr);
+    // cmd->argc = 0;
+    // char *saveptr = NULL;
+    // char *token = strtok_r(trimmed, " ", &saveptr);
+    make_tokens(cmd, trimmed);
 
-    while (token) {
-        cmd->argv[cmd->argc] = strdup(token);
-        if (!cmd->argv[cmd->argc]) {
-            for (int i = 0; i < cmd->argc; i++)
-                free(cmd->argv[i]);
-            free(cmd);
-            free(copy);
-            free(cmd->argv);
-            return NULL;
-        }
-        cmd -> argc++;
-        token = strtok_r(NULL, " ", &saveptr);
-    }
+    // while (token) {
+    //     cmd->argv[cmd->argc] = strdup(token);
+    //     if (!cmd->argv[cmd->argc]) {
+    //         for (int i = 0; i < cmd->argc; i++)
+    //             free(cmd->argv[i]);
+    //         free(cmd);
+    //         free(copy);
+    //         free(cmd->argv);
+    //         return NULL;
+    //     }
+    //     cmd -> argc++;
+    //     token = strtok_r(NULL, " ", &saveptr);
+    // }
 
-    cmd -> argv[cmd -> argc] = NULL;
+    cmd->argv[cmd->argc] = NULL;
 
-    if (cmd -> argc > 0 && cmd -> argc < len) {
-        char **trimmed_argv = realloc(cmd -> argv, (cmd -> argc + 1) * sizeof(char*));
+    if (cmd->argc > 0 && cmd->argc < len) {
+        char **trimmed_argv =
+            realloc(cmd->argv, (cmd->argc + 1) * sizeof(char *));
         if (trimmed_argv) {
-            cmd -> argv = trimmed_argv;
+            cmd->argv = trimmed_argv;
         }
     }
 
@@ -101,13 +160,14 @@ CommandArgs *tokenize_input(const char *input) {
     return cmd;
 }
 
-void free_command_args(CommandArgs* cmd) {
-    if (!cmd) return;
+void free_command_args(CommandArgs *cmd) {
+    if (!cmd)
+        return;
 
-    if (cmd -> argv) {
-        for(int i = 0; i < cmd -> argc; i++)
-            free(cmd -> argv[i]);
-        free(cmd -> argv);
+    if (cmd->argv) {
+        for (int i = 0; i < cmd->argc; i++)
+            free(cmd->argv[i]);
+        free(cmd->argv);
     }
     free(cmd);
 }
