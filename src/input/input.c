@@ -29,7 +29,23 @@ void make_tokens(CommandArgs *cmd, const char *input) {
         return;
 
     while (input[i] != '\0') {
-        if (input[i] == '\\' && in_single == 0 && in_double == 0) {
+        if (input[i] == '\\') {
+            if (in_double) {
+                if (input[i + 1] != '\0') {
+                    if (input[i + 1] == '\"' || input[i + 1] == '\\' ||
+                        input[i + 1] == '$' || input[i + 1] == '`') {
+                        buffer[buf_idx++] = input[i + 1];
+                        i += 2;
+                        continue;
+                    } else {
+                        buffer[buf_idx++] = input[i++];
+                        continue;
+                    }
+                }
+            } else if (in_single == 1 && input[i + 1] != '\0') {
+                buffer[buf_idx++] = input[i++];
+                continue;
+            }
             if (input[i + 1] != '\0') {
                 buffer[buf_idx++] = input[i + 1];
                 i += 2;
