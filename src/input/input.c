@@ -50,6 +50,8 @@ void make_tokens(CommandArgs *cmd, const char *input) {
         if (!(in_single == 1 || in_double == 1) && input[i] == ' ') {
             buffer[buf_idx] = '\0';
             cmd->argv[cmd->argc++] = strdup(buffer);
+            free(buffer);
+            buffer = malloc(strlen(input));
             if (!cmd->argv[cmd->argc-1]) {
                 for (int i = 0; i < cmd->argc; i++)
                     free(cmd->argv[i]);
@@ -70,8 +72,8 @@ void make_tokens(CommandArgs *cmd, const char *input) {
 
     if (buffer) {
         buffer[buf_idx] = '\0';
-        cmd->argv[cmd->argc] = strdup(buffer);
-        if (!cmd->argv[cmd->argc]) {
+        cmd->argv[cmd->argc++] = strdup(buffer);
+        if (!cmd->argv[cmd->argc-1]) {
             for (int i = 0; i < cmd->argc; i++)
                 free(cmd->argv[i]);
             free(cmd);
@@ -80,7 +82,6 @@ void make_tokens(CommandArgs *cmd, const char *input) {
             cmd->argc = 0;
             return;
         }
-        cmd->argc++;
         free(buffer);
     }
 }
