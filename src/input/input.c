@@ -22,14 +22,14 @@ char *trim_whitespace(char *str) {
 
 void make_tokens(CommandArgs *cmd, const char *input) {
     int i = 0, buf_idx = 0;
-    int in_single = 0;
+    int in_single = 0, in_double = 0;
     cmd->argc = 0;
     char *buffer = malloc(sizeof(input));
     if (!buffer)
         return;
 
     while (input[i] != '\0') {
-        if (input[i] == '\'') {
+        if (input[i] == '\'' && in_double == 0) {
             if (in_single == 1)
                 in_single = 0;
             else if (in_single == 0)
@@ -38,7 +38,16 @@ void make_tokens(CommandArgs *cmd, const char *input) {
             continue;
         }
 
-        if (in_single == 0 && input[i] == ' ') {
+        if (input[i] == '\"' && in_single == 0) {
+            if (in_double == 1)
+                in_double = 0;
+            else if (in_double == 0)
+                in_double = 1;
+            i++;
+            continue;
+        }
+
+        if (!(in_single == 1 || in_double == 1) && input[i] == ' ') {
             buffer[buf_idx] = '\0';
             cmd->argv[cmd->argc++] = strdup(buffer);
             if (!cmd->argv[cmd->argc-1]) {
