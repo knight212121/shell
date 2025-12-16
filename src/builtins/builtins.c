@@ -150,10 +150,9 @@ int execute_builtin_command(CommandArgs *cmd) {
             } else if (cmd->stderr_file) {
                 int file_desc;
                 if (cmd->stderr_append == 1)
-                    file_desc = open(cmd->stdout_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
+                    file_desc = open(cmd->stderr_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
                 else
-                    file_desc = open(cmd->stdout_file, O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
-
+                    file_desc = open(cmd->stderr_file, O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
                 fflush(stderr);
                 int saved_std = dup(2);
                 dup2(file_desc, 2);

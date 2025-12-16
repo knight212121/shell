@@ -72,9 +72,9 @@ int execute_external_command(CommandArgs *cmd) {
                 saved_std = dup(2);
                 int file_desc;
                 if (cmd->stderr_append == 1)
-                    file_desc = open(cmd->stdout_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
+                    file_desc = open(cmd->stderr_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
                 else
-                    file_desc = open(cmd->stdout_file, O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
+                    file_desc = open(cmd->stderr_file, O_CREAT | O_APPEND | O_WRONLY, S_IRUSR | S_IWUSR);
                 fflush(stderr);
                 dup2(file_desc, 2);
                 execve(executable, cmd->argv, env_args);
