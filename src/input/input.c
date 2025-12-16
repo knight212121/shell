@@ -185,10 +185,6 @@ CommandArgs *tokenize_input(const char *input) {
         }
     }
 
-    //for (int i = 0; i < cmd->argc; i += 1) {
-    //    printf("%s\n", cmd->argv[i]);
-    //}
-
     free(copy);
     return cmd;
 }
@@ -198,8 +194,9 @@ void free_command_args(CommandArgs *cmd) {
         return;
 
     if (cmd->argv) {
-        for (int i = 0; i < cmd->argc; i++)
+        for (int i = 0; i < cmd->argc; i++) {
             free(cmd->argv[i]);
+        }
         free(cmd->argv);
     }
     free(cmd->stdin_file);

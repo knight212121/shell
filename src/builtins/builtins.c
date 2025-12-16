@@ -15,11 +15,18 @@ void cd(CommandArgs* cmd) {
     }
     char* full_path;
     if (cmd->argv[1][0] == '~') {
-        cmd->argv[1]++;
         char* home = getenv("HOME");
-        full_path = (char*) malloc(strlen(home) + strlen(cmd->argv[1]));
+        if (!home) {
+            printf("$HOME not set");
+            return;
+        }
+        full_path = malloc(strlen(home) + strlen(cmd->argv[1]) + 1);
+        if (!full_path) {
+            printf("malloc error");
+            return;
+        }
         strcpy(full_path, home);
-        strcat(full_path, cmd->argv[1]);
+        strcat(full_path, cmd->argv[1] + 1);
     } else {
         full_path = strdup(cmd->argv[1]);
     }
