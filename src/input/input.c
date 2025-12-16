@@ -180,6 +180,21 @@ CommandArgs *tokenize_input(const char *input) {
                 free(cmd->argv[j]);
             cmd->argc = i;
             break;
+        } else if ((strcmp(">>", cmd->argv[i]) == 0) ||
+                   (strcmp("1>>", cmd->argv[i]) == 0)) {
+            cmd->stdout_append = 2;
+            cmd->stdout_file = strdup(cmd->argv[i + 1]);
+            for (int j = i; j < cmd->argc; j += 1)
+                free(cmd->argv[j]);
+            cmd->argc = i;
+            break;
+        } else if (strcmp("2>>", cmd->argv[i]) == 0) {
+            cmd->stderr_append = 2;
+            cmd->stderr_file = strdup(cmd->argv[i + 1]);
+            for (int j = i; j < cmd->argc; j += 1)
+                free(cmd->argv[j]);
+            cmd->argc = i;
+            break;
         }
     }
 
