@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 void cd(CommandArgs* cmd) {
@@ -128,7 +129,16 @@ int command_count = sizeof(commands) / sizeof(commands[0]);
 int execute_builtin_command(CommandArgs *cmd) {
     for (int i = 0; i < command_count; i += 1) {
         if (strcmp(commands[i].name, cmd->argv[0]) == 0) {
-            commands[i].func(cmd);
+            if (cmd->stdout_file != NULL) {
+                int file_desc = open(cmd->stdout_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
+                fflush(stdout);
+                int saved_stdout = dup(1);
+                dup2(file_desc, 1);
+                commands[i].func(cmd);
+                dup2(saved_stdout, 1);
+            } else {
+                commands[i].func(cmd);
+            }
             return 1;
         }
     }

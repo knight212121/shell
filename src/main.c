@@ -20,6 +20,8 @@ int main(int argc, char *argv[]) {
 
         execute_command(cmd);
 
+        free_command_args(cmd);
+
     }
 
     return 0;

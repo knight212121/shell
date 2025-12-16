@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 enum { BUF_SIZE = 4096 };
 
@@ -50,16 +51,25 @@ char* find_external_command(char *name) {
 int execute_external_command(CommandArgs *cmd) {
     char *executable = find_external_command(cmd->argv[0]);
     if (executable) {
+        int saved_stdout = dup(1);
         pid_t pid = fork();
         if (pid < 0) {
             perror("fork fail");
             exit(1);
         } else if (pid == 0) {
             static char *env_args[] = { NULL };
-            execve(executable, cmd->argv, env_args);
+            if (cmd->stdout_file) {
+                int file_desc = open(cmd->stdout_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
+                fflush(stdout);
+                dup2(file_desc, 1);
+                execve(executable, cmd->argv, env_args);
+            } else
+                execve(executable, cmd->argv, env_args);
             perror("execve");
         } else {
             wait(NULL);
+            if (cmd->stdout_file)
+                dup2(saved_stdout, 1);
         }
         return 1;
     }
