@@ -51,7 +51,7 @@ char* find_external_command(char *name) {
 int execute_external_command(CommandArgs *cmd) {
     char *executable = find_external_command(cmd->argv[0]);
     if (executable) {
-        int saved_stdout = dup(1);
+        int saved_std;
         pid_t pid = fork();
         if (pid < 0) {
             perror("fork fail");
@@ -59,9 +59,16 @@ int execute_external_command(CommandArgs *cmd) {
         } else if (pid == 0) {
             static char *env_args[] = { NULL };
             if (cmd->stdout_file) {
+                saved_std = dup(1);
                 int file_desc = open(cmd->stdout_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
                 fflush(stdout);
                 dup2(file_desc, 1);
+                execve(executable, cmd->argv, env_args);
+            } else if (cmd->stderr_file) {
+                saved_std = dup(2);
+                int file_desc = open(cmd->stderr_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
+                fflush(stderr);
+                dup2(file_desc, 2);
                 execve(executable, cmd->argv, env_args);
             } else
                 execve(executable, cmd->argv, env_args);
@@ -69,7 +76,9 @@ int execute_external_command(CommandArgs *cmd) {
         } else {
             wait(NULL);
             if (cmd->stdout_file)
-                dup2(saved_stdout, 1);
+                dup2(saved_std, 1);
+            if (cmd->stderr_file)
+                dup2(saved_std, 2);
         }
         return 1;
     }

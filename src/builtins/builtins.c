@@ -136,13 +136,20 @@ int command_count = sizeof(commands) / sizeof(commands[0]);
 int execute_builtin_command(CommandArgs *cmd) {
     for (int i = 0; i < command_count; i += 1) {
         if (strcmp(commands[i].name, cmd->argv[0]) == 0) {
-            if (cmd->stdout_file != NULL) {
+            if (cmd->stdout_file) {
                 int file_desc = open(cmd->stdout_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
                 fflush(stdout);
-                int saved_stdout = dup(1);
+                int saved_std = dup(1);
                 dup2(file_desc, 1);
                 commands[i].func(cmd);
-                dup2(saved_stdout, 1);
+                dup2(saved_std, 1);
+            } else if (cmd->stderr_file) {
+                int file_desc = open(cmd->stdout_file, O_CREAT | O_TRUNC | O_WRONLY, S_IRUSR | S_IWUSR);
+                fflush(stderr);
+                int saved_std = dup(2);
+                dup2(file_desc, 2);
+                commands[i].func(cmd);
+                dup2(saved_std, 2);
             } else {
                 commands[i].func(cmd);
             }

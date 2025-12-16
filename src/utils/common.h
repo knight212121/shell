@@ -5,9 +5,11 @@ typedef struct {
     int argc;
     char **argv;
 
-    char *stdin_file;
     char *stdout_file;
-    int append;
+    int stdout_append;
+
+    char *stderr_file;
+    int stderr_append;
 } CommandArgs;
 
 #endif

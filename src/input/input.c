@@ -121,7 +121,7 @@ CommandArgs *tokenize_input(const char *input) {
             return NULL;
         }
         cmd->argv[0] = NULL;
-        cmd->stdout_file = cmd->stdin_file = NULL;
+        cmd->stdout_file = cmd->stderr_file = NULL;
         return cmd;
     }
 
@@ -143,7 +143,7 @@ CommandArgs *tokenize_input(const char *input) {
             return NULL;
         }
         cmd->argv[0] = NULL;
-        cmd->stdout_file = cmd->stdin_file = NULL;
+        cmd->stdout_file = cmd->stderr_file = NULL;
         return cmd;
     }
 
@@ -162,16 +162,24 @@ CommandArgs *tokenize_input(const char *input) {
     }
 
     make_tokens(cmd, trimmed);
-    cmd->stdout_file = cmd->stdin_file = NULL;
+    cmd->stdout_file = cmd->stderr_file = NULL;
 
     for (int i = 0; i < cmd->argc; i += 1) {
         if ((strcmp(">", cmd->argv[i]) == 0) ||
             (strcmp("1>", cmd->argv[i]) == 0)) {
-            cmd->append = 1;
+            cmd->stdout_append = 1;
             cmd->stdout_file = strdup(cmd->argv[i + 1]);
             for (int j = i; j < cmd->argc; j += 1)
                 free(cmd->argv[j]);
             cmd->argc = i;
+            break;
+        } else if (strcmp("2>", cmd->argv[i]) == 0) {
+            cmd->stderr_append = 1;
+            cmd->stderr_file = strdup(cmd->argv[i + 1]);
+            for (int j = i; j < cmd->argc; j += 1)
+                free(cmd->argv[j]);
+            cmd->argc = i;
+            break;
         }
     }
 
@@ -184,6 +192,9 @@ CommandArgs *tokenize_input(const char *input) {
             cmd->argv = trimmed_argv;
         }
     }
+
+    // for(int i = 0; i < cmd->argc; i += 1)
+    //     printf("%s\n", cmd->argv[i]);
 
     free(copy);
     return cmd;
@@ -199,7 +210,7 @@ void free_command_args(CommandArgs *cmd) {
         }
         free(cmd->argv);
     }
-    free(cmd->stdin_file);
+    free(cmd->stderr_file);
     free(cmd->stdout_file);
     free(cmd);
 }
