@@ -208,9 +208,6 @@ CommandArgs *tokenize_input(const char *input) {
         }
     }
 
-    // for(int i = 0; i < cmd->argc; i += 1)
-    //     printf("%s\n", cmd->argv[i]);
-
     free(copy);
     return cmd;
 }

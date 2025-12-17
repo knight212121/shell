@@ -1,27 +1,26 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <readline/readline.h>
 #include "utils/common.h"
 #include "input/input.h"
+#include "autocomplete/autocomplete.h"
 #include "executor/executor.h"
 
 int main(int argc, char *argv[]) {
+    rl_attempted_completion_function = input_completion;
     while (1) {
-        // Flush after every printf
         setbuf(stdout, NULL);
 
-        printf("$ ");
+        char* input = readline("$ ");
 
-        char command[1024];
-        fgets(command, sizeof(command), stdin);
-
-        command[strcspn(command, "\n")] = '\0';
-
-        CommandArgs* cmd = tokenize_input(command);
+        CommandArgs* cmd = tokenize_input(input);
 
         execute_command(cmd);
 
         free_command_args(cmd);
 
+        free(input);
     }
 
     return 0;

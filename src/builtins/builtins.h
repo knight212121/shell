@@ -10,7 +10,6 @@ typedef void (*CommandFunc)(CommandArgs* cmd);
 typedef struct {
     char name[10];
     CommandFunc func;
-    int is_redirect_capable;
 } ShellCommand;
 
 extern ShellCommand commands[];
