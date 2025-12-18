@@ -8,6 +8,7 @@
 #include "executor/executor.h"
 
 int main(int argc, char *argv[]) {
+    create_autocomplete_cache();
     rl_attempted_completion_function = input_completion;
     while (1) {
         setbuf(stdout, NULL);
