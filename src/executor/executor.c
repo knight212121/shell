@@ -97,10 +97,6 @@ void execute_command(Pipeline *pipes) {
                     file_desc =
                         open(cmd->stdout_file, O_CREAT | O_APPEND | O_WRONLY,
                              S_IRUSR | S_IWUSR);
-                if (file_desc == -1) {
-                    perror(cmd->stdout_file);
-                    _exit(1);
-                }
                 dup2(file_desc, STDOUT_FILENO);
                 close(file_desc);
             }
@@ -114,10 +110,6 @@ void execute_command(Pipeline *pipes) {
                     file_desc =
                         open(cmd->stderr_file, O_CREAT | O_APPEND | O_WRONLY,
                              S_IRUSR | S_IWUSR);
-                if (file_desc == -1) {
-                    perror(cmd->stderr_file);
-                    _exit(1);
-                }
                 dup2(file_desc, STDERR_FILENO);
                 close(file_desc);
             }
