@@ -154,7 +154,7 @@ Pipeline *tokenize_input(char *input) {
             iterator += 1;
         } else if ((strcmp(">>", tokens[iterator]) == 0) ||
                    (strcmp("1>>", tokens[iterator]) == 0)) {
-            cmd->stdout_append = 0;
+            cmd->stdout_append = 2;
             cmd->stdout_file = strdup(tokens[iterator + 1]);
             iterator += 1;
         } else if (strcmp("2>>", tokens[iterator]) == 0) {
