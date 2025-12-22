@@ -136,7 +136,7 @@ Pipeline *tokenize_input(char *input) {
     cmd->argc = 0;
 
     Pipeline *p = malloc(sizeof(Pipeline));
-    p->cmds = malloc(sizeof(CommandArgs) * len);
+    p->cmds = malloc(sizeof(CommandArgs) * len + 1);
     if (!p)
         return NULL;
     p->count = 0;
@@ -171,7 +171,7 @@ Pipeline *tokenize_input(char *input) {
             if (!cmd)
                 return NULL;
 
-            cmd->argv = malloc(sizeof(char *) * len);
+            cmd->argv = malloc(sizeof(char *) * len + 1);
             cmd->stdout_file = cmd->stderr_file = NULL;
             cmd->argc = 0;
         } else {
@@ -186,7 +186,7 @@ Pipeline *tokenize_input(char *input) {
             }
         }
     }
-    cmd->argv = realloc(cmd->argv, sizeof(CommandArgs *) * cmd->argc);
+    cmd->argv = realloc(cmd->argv, sizeof(CommandArgs *) * cmd->argc + 1);
     cmd->argv[cmd->argc] = NULL;
 
     p->cmds[p->count++] = cmd;
@@ -208,11 +208,15 @@ void free_command_args(Pipeline *pipes) {
         return;
 
     for (int i = 0; i < pipes->count; i += 1) {
-        for (int j = 0; j < pipes->cmds[i]->argc; j += 1)
-            free(pipes->cmds[i]->argv[j]);
-        free(pipes->cmds[i]->argv);
-        free(pipes->cmds[i]->stderr_file);
-        free(pipes->cmds[i]->stdout_file);
+        CommandArgs* cmd = pipes->cmds[i];
+        for (int j = 0; j < cmd->argc; j += 1) {
+            free(cmd->argv[j]);
+        }
+        free(cmd->argv);
+        free(cmd->stderr_file);
+        free(cmd->stdout_file);
+        free(cmd);
     }
+    free(pipes->cmds);
     free(pipes);
 }
