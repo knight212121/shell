@@ -121,22 +121,26 @@ void execute_command(Pipeline *pipes) {
                 dup2(file_desc, STDERR_FILENO);
                 close(file_desc);
             }
-            if (execute_builtin_command(pipes->cmds[i]) != 1)
-                if (execute_external_command(pipes->cmds[i]) != 1) {
-                    fprintf(stderr, "%s: command not found\n", pipes->cmds[i]->argv[0]);
-                    _exit(127);
-                }
+            if (execute_builtin_command(pipes->cmds[i]) == 1)
+                _exit(0);
+            else if (execute_external_command(pipes->cmds[i]) == 1)
+                _exit(0);
+            else {
+                fprintf(stderr, "%s: command not found\n",
+                        pipes->cmds[i]->argv[0]);
+                _exit(127);
+            }
+            _exit(1);
         } else {
             if (i < pipes->count - 1) {
                 close(pipefd[1]);
                 if (prev_read_fd != -1)
                     close(prev_read_fd);
                 prev_read_fd = pipefd[0];
-            } else {
-                prev_read_fd = -1;
             }
         }
     }
+
     for (int i = 0; i < pipes->count; i += 1)
         wait(NULL);
 }
