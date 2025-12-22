@@ -3,6 +3,6 @@
 
 #include "../utils/common.h"
 
-void execute_command(CommandArgs* cmd);
+void execute_command(Pipeline* pipes);
 
 #endif

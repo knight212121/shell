@@ -3,8 +3,8 @@
 
 #include "../utils/common.h"
 
-CommandArgs* tokenize_input(const char* input);
+Pipeline* tokenize_input(char* input);
 
-void free_command_args(CommandArgs* cmd);
+void free_command_args(Pipeline* pipes);
 
 #endif

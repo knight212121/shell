@@ -10,6 +10,12 @@ typedef struct {
 
     char *stderr_file;
     int stderr_append;
+
 } CommandArgs;
+
+typedef struct {
+    int count;
+    CommandArgs **cmds;
+} Pipeline;
 
 #endif
