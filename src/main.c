@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
     create_autocomplete_cache();
     rl_attempted_completion_function = input_completion;
-    initialize_history(3);
+    initialize_history(10);
     while (1) {
         setbuf(stdout, NULL);
 

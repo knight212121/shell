@@ -5,6 +5,7 @@ typedef struct {
     char **lines;
     int max_size;
     int begin;
+    int insertion_count;
 } History;
 
 void initialize_history(int size);
