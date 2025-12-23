@@ -73,6 +73,10 @@ void execute_command(Pipeline *pipes) {
             }
         }
         CommandArgs *cmd = pipes->cmds[i];
+        if (is_parent_builtin(cmd->argv[0]) == 1) {
+            execute_builtin_command(cmd);
+            continue;
+        }
         pid_t pid = fork();
         if (pid == -1) {
             perror("Fork fail");

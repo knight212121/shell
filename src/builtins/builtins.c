@@ -124,11 +124,21 @@ void pwd(CommandArgs *cmd) {
 }
 
 ShellCommand commands[] = {
-    {"echo", echo}, {"exit", exit_shell}, {"type", type},
-    {"pwd", pwd},   {"cd", cd},
+    {"echo", echo, 0}, {"exit", exit_shell, 0}, {"type", type, 0},
+    {"pwd", pwd, 0},   {"cd", cd, 1},
 };
 
 int command_count = sizeof(commands) / sizeof(commands[0]);
+
+int is_parent_builtin(char *cmd) {
+    for (int i = 0; i < command_count; i += 1) {
+        if (strcmp(commands[i].name, cmd) == 0 && commands[i].parent_builtin == 1) {
+            return 1;
+        }
+    }
+    return 0;
+
+}
 
 int execute_builtin_command(CommandArgs *cmd) {
     for (int i = 0; i < command_count; i += 1) {

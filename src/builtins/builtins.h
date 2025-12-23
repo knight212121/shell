@@ -7,9 +7,12 @@ int execute_builtin_command(CommandArgs* cmd);
 
 typedef void (*CommandFunc)(CommandArgs* cmd);
 
+int is_parent_builtin(char *cmd);
+
 typedef struct {
     char name[10];
     CommandFunc func;
+    int parent_builtin;
 } ShellCommand;
 
 extern ShellCommand commands[];
