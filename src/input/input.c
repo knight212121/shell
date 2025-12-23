@@ -162,7 +162,7 @@ Pipeline *tokenize_input(char *input) {
             cmd->stderr_file = strdup(tokens[iterator + 1]);
             iterator += 1;
         } else if (strcmp("|", tokens[iterator]) == 0) {
-            cmd->argv = realloc(cmd->argv, sizeof(char *) * cmd->argc);
+            cmd->argv = realloc(cmd->argv, sizeof(char *) * cmd->argc + 1);
             cmd->argv[cmd->argc] = NULL;
 
             p->cmds[p->count++] = cmd;
