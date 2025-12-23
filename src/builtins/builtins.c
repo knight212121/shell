@@ -8,6 +8,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+
 void cd(CommandArgs *cmd) {
     if (cmd->argc > 2) {
         printf("cd: too many arguments\n");
@@ -51,9 +55,11 @@ void exit_shell(CommandArgs *cmd) {
 
 void echo(CommandArgs *cmd) {
     for (int i = 1; i < cmd->argc; i += 1) {
-        printf("%s ", cmd->argv[i]);
+        if (i > 1)
+            write(STDOUT_FILENO, " ", 1);
+        write(STDOUT_FILENO, cmd->argv[i], strlen(cmd->argv[i]));
     }
-    printf("\n");
+    write(STDOUT_FILENO, "\n", 1);
 }
 
 void type(CommandArgs *cmd) {
