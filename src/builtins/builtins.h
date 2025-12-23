@@ -2,6 +2,7 @@
 #define BUILTINS_H
 
 #include "../utils/common.h"
+#include "history.h"
 
 int execute_builtin_command(CommandArgs* cmd);
 

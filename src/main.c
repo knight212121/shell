@@ -1,6 +1,7 @@
 #include "autocomplete/autocomplete.h"
 #include "executor/executor.h"
 #include "input/input.h"
+#include "builtins/history.h"
 #include "utils/common.h"
 #include <stdio.h>
 #include <readline/readline.h>
@@ -9,6 +10,7 @@
 int main(int argc, char *argv[]) {
     create_autocomplete_cache();
     rl_attempted_completion_function = input_completion;
+    initialize_history(3);
     while (1) {
         setbuf(stdout, NULL);
 
@@ -17,6 +19,8 @@ int main(int argc, char *argv[]) {
         Pipeline *pipes = tokenize_input(input);
 
         if (pipes != NULL) {
+            add_to_history(input);
+
             execute_command(pipes);
 
             free_command_args(pipes);

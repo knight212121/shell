@@ -1,4 +1,5 @@
 #include "builtins.h"
+#include "history.h"
 #include <dirent.h>
 #include <fcntl.h>
 #include <linux/limits.h>
@@ -129,9 +130,13 @@ void pwd(CommandArgs *cmd) {
     }
 }
 
+void shell_history(CommandArgs *cmd) {
+    print_history();
+}
+
 ShellCommand commands[] = {
     {"echo", echo, 0}, {"exit", exit_shell, 1}, {"type", type, 0},
-    {"pwd", pwd, 0},   {"cd", cd, 1},
+    {"pwd", pwd, 0},   {"cd", cd, 1}, {"history", shell_history, 0},
 };
 
 int command_count = sizeof(commands) / sizeof(commands[0]);
