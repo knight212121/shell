@@ -124,7 +124,7 @@ void pwd(CommandArgs *cmd) {
 }
 
 ShellCommand commands[] = {
-    {"echo", echo, 0}, {"exit", exit_shell, 0}, {"type", type, 0},
+    {"echo", echo, 0}, {"exit", exit_shell, 1}, {"type", type, 0},
     {"pwd", pwd, 0},   {"cd", cd, 1},
 };
 
