@@ -1,10 +1,11 @@
 #include "autocomplete/autocomplete.h"
+#include "builtins/history.h"
 #include "executor/executor.h"
 #include "input/input.h"
-#include "builtins/history.h"
 #include "utils/common.h"
 #include <stdio.h>
 #include <readline/readline.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
@@ -22,11 +23,10 @@ int main(int argc, char *argv[]) {
             add_to_history(input);
 
             execute_command(pipes);
-
-            free_command_args(pipes);
-
-            free(input);
         }
+        free_command_args(pipes);
+
+        free(input);
     }
 
     return 0;

@@ -10,16 +10,16 @@ void initialize_history(int size) {
     history->max_size = size;
     history->begin = 0;
     history->lines = malloc(sizeof(char *) * size);
-    for(int i = 0; i < size; i += 1)
-        history->lines[i] = NULL;
     history->insertion_count = 0;
 }
 
 void add_to_history(char *command) {
-    if (history->begin >= history->max_size)
-        history->max_size += history->max_size;
-    for(int i = history->begin; i < history->max_size; i += 1) {
-        history->lines[i] = NULL;
+    if (history->begin >= history->max_size) {
+        history->max_size *= 2;
+        char **temp = realloc(history->lines, sizeof(char *) * history->max_size);
+        if (!temp)
+            return;
+        history->lines = temp;
     }
     history->lines[history->begin++] = strdup(command);
     history->insertion_count += 1;
