@@ -131,7 +131,12 @@ void pwd(CommandArgs *cmd) {
 }
 
 void shell_history(CommandArgs *cmd) {
-    print_history();
+    int offset;
+    if (cmd->argc < 2)
+        offset = -1;
+    else
+        offset = atoi(cmd->argv[1]);
+    print_history(offset);
 }
 
 ShellCommand commands[] = {

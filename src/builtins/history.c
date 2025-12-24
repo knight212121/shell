@@ -23,8 +23,8 @@ void add_to_history(char *command) {
     history->insertion_count += 1;
 }
 
-void print_history() {
-    int total_entries, begin;
+void print_history(int offset) {
+    int total_entries, begin, count;
     if (history->max_size < history->insertion_count) {
         total_entries = history->max_size;
         begin = history->begin % history->max_size;
@@ -32,10 +32,14 @@ void print_history() {
         total_entries = history->insertion_count;
         begin = 0;
     }
+    if (offset != -1)
+        count = offset;
+    else
+        count = history->max_size;
 
-    for(int i = 0; i < total_entries; i += 1) {
+    for(int i = 0; i < count; i += 1) {
         if(history->lines[begin] != NULL)
-            printf("    %d  %s\n", i + 1, history->lines[begin]);
+            printf("    %d  %s\n", (history->insertion_count - count + i + 1), history->lines[((history->insertion_count - count + i) % history->max_size)]);
         begin = (begin + 1) % history->max_size;
     }
 }

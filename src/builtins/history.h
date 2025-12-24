@@ -10,7 +10,7 @@ typedef struct {
 
 void initialize_history(int size);
 void add_to_history(char* command);
-void print_history();
+void print_history(int offset);
 void free_history();
 
 #endif
