@@ -16,30 +16,24 @@ void initialize_history(int size) {
 }
 
 void add_to_history(char *command) {
-    if (history->lines[history->begin] != NULL)
-        free(history->lines[history->begin]);
-    history->lines[history->begin] = strdup(command);
-    history->begin = (history->begin + 1) % history->max_size;
+    if (history->begin >= history->max_size)
+        history->max_size += history->max_size;
+    for(int i = history->begin; i < history->max_size; i += 1) {
+        history->lines[i] = NULL;
+    }
+    history->lines[history->begin++] = strdup(command);
     history->insertion_count += 1;
 }
 
 void print_history(int offset) {
-    int total_entries, begin, count;
-    if (history->max_size < history->insertion_count) {
-        total_entries = history->max_size;
-        begin = history->begin % history->max_size;
-    } else {
-        total_entries = history->insertion_count;
-        begin = 0;
-    }
-    if (offset != -1)
-        count = offset;
+    int i;
+    if (offset == -1)
+        i = 0;
     else
-        count = history->max_size;
-
-    for(int i = 0; i < count; i += 1) {
-        if(history->lines[begin] != NULL)
-            printf("    %d  %s\n", (history->insertion_count - count + i + 1), history->lines[((history->insertion_count - count + i) % history->max_size)]);
-        begin = (begin + 1) % history->max_size;
+        i = history->insertion_count - offset;
+    while(i < history->insertion_count) {
+        if(history->lines[i] != NULL)
+            printf("    %d  %s\n", i + 1, history->lines[i]);
+        i += 1;
     }
 }
