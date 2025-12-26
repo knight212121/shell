@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     else
         history_file = strdup("/tmp/history");
     if (read_history(history_file) != 0)
-                printf("Error reading history file");
+        printf("Error reading history file");
     signal(SIGINT, int_handler);
     while (keep_running) {
         setbuf(stdout, NULL);
