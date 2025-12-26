@@ -57,7 +57,6 @@ void exit_shell(CommandArgs *cmd) {
     if (cmd->argv[1]) {
         code = atoi(cmd->argv[1]);
     }
-    printf("%s", history_file);
     write_history(history_file);
     exit(code);
 }
