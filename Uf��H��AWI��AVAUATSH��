@@ -1,9 +1,0 @@
-echo new_command
-history -a /tmp/pear.txt
-cat /tmp/pear.txt
-echo blueberry raspberry strawberry
-echo blueberry pineapple
-history -a /tmp/mango.txt
-echo pear mango
-history -a /tmp/mango.txt
-cat /tmp/mango.txt

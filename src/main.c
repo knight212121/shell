@@ -21,7 +21,6 @@ int main(int argc, char *argv[]) {
     rl_attempted_completion_function = input_completion;
     using_history();
     stifle_history(1000);
-    char *history_file;
     if (getenv("HISTFILE") != NULL)
         history_file = strdup(getenv("HISTFILE"));
     else

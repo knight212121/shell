@@ -1,5 +1,6 @@
 #include "builtins.h"
 #include "history.h"
+#include "../utils/common.h"
 #include <dirent.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -56,8 +57,9 @@ void exit_shell(CommandArgs *cmd) {
     if (cmd->argv[1]) {
         code = atoi(cmd->argv[1]);
     }
-    exit(code);
+    printf("%s", history_file);
     write_history(history_file);
+    exit(code);
 }
 
 void echo(CommandArgs *cmd) {
