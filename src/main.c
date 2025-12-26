@@ -21,16 +21,12 @@ int main(int argc, char *argv[]) {
     using_history();
     stifle_history(1000);
     char *history_file;
-    if (getenv("HISTFILE") != NULL) {
+    if (getenv("HISTFILE") != NULL)
         history_file = strdup(getenv("HISTFILE"));
-        if (history_file) {
-            if (read_history(history_file) != 0)
-                printf("Error writing history file");
-        }
-    } else {
-        if (read_history("/tmp/history") != 0)
-                printf("Error writing history file");
-    }
+    else
+        history_file = strdup("/tmp/history");
+    if (read_history(history_file) != 0)
+                printf("Error reading history file");
     signal(SIGINT, int_handler);
     while (keep_running) {
         setbuf(stdout, NULL);
