@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-History *history;
-
 void print_history(int offset) {
     if (offset == -1) {
         HIST_ENTRY **hist = history_list();

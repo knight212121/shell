@@ -2,7 +2,10 @@
 #include "history.h"
 #include <dirent.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <linux/limits.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -131,29 +134,32 @@ void pwd(CommandArgs *cmd) {
 }
 
 void shell_history(CommandArgs *cmd) {
-    int offset;
-    if (cmd->argc < 2)
-        offset = -1;
-    else
-        offset = atoi(cmd->argv[1]);
-    print_history(offset);
+    if (cmd->argc == 1) {
+        print_history(-1);
+        return;
+    }
+    if (cmd->argc == 3 && strcmp(cmd->argv[1], "-r") == 0) {
+        if (read_history(cmd->argv[2]) != 0)
+            printf("Error reading file");
+        return;
+    }
 }
 
 ShellCommand commands[] = {
     {"echo", echo, 0}, {"exit", exit_shell, 1}, {"type", type, 0},
-    {"pwd", pwd, 0},   {"cd", cd, 1}, {"history", shell_history, 0},
+    {"pwd", pwd, 0},   {"cd", cd, 1},           {"history", shell_history, 1},
 };
 
 int command_count = sizeof(commands) / sizeof(commands[0]);
 
 int is_parent_builtin(char *cmd) {
     for (int i = 0; i < command_count; i += 1) {
-        if (strcmp(commands[i].name, cmd) == 0 && commands[i].parent_builtin == 1) {
+        if (strcmp(commands[i].name, cmd) == 0 &&
+            commands[i].parent_builtin == 1) {
             return 1;
         }
     }
     return 0;
-
 }
 
 int execute_builtin_command(CommandArgs *cmd) {
