@@ -137,7 +137,8 @@ void shell_history(CommandArgs *cmd) {
     if (cmd->argc == 1) {
         print_history(-1);
         return;
-    } 
+    }
+
     if (cmd->argc == 2) {
         for(int i = 0; i < strlen(cmd->argv[1]); i += 1) {
             if (!(cmd->argv[1][i] >= '0' && cmd->argv[1][i] <= '9')) {
@@ -148,9 +149,21 @@ void shell_history(CommandArgs *cmd) {
         print_history(atoi(cmd->argv[1]));
         return;
     }
+
     if (cmd->argc == 3 && strcmp(cmd->argv[1], "-r") == 0) {
         if (read_history(cmd->argv[2]) != 0)
             printf("Error reading file");
+        return;
+    }
+
+    if (cmd->argc == 3 && strcmp(cmd->argv[1], "-w") == 0) {
+        if (write_history(cmd->argv[2]) != 0)
+            printf("Error writing file");
+        FILE *fp = fopen(cmd->argv[2], "a");
+        if (fp != NULL) {
+            fprintf(fp, "\n");
+            fclose(fp);
+        }
         return;
     }
 }
