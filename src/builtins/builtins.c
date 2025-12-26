@@ -159,11 +159,6 @@ void shell_history(CommandArgs *cmd) {
     if (cmd->argc == 3 && strcmp(cmd->argv[1], "-w") == 0) {
         if (write_history(cmd->argv[2]) != 0)
             printf("Error writing file");
-        FILE *fp = fopen(cmd->argv[2], "a");
-        if (fp != NULL) {
-            fprintf(fp, "\n");
-            fclose(fp);
-        }
         return;
     }
 }
