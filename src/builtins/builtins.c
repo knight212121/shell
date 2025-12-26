@@ -16,6 +16,8 @@
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
+static int last_appended = 0;
+
 void cd(CommandArgs *cmd) {
     if (cmd->argc > 2) {
         printf("cd: too many arguments\n");
@@ -163,8 +165,12 @@ void shell_history(CommandArgs *cmd) {
     }
 
     if (cmd->argc == 3 && strcmp(cmd->argv[1], "-a") == 0) {
-        if (append_history(history_length, cmd->argv[2]) != 0)
-            printf("Error writing file");
+        int new_entries = history_length - last_appended;
+        if (new_entries > 0) {
+            if (append_history(new_entries, cmd->argv[2]) != 0)
+                printf("Error writing file");
+            last_appended = history_length;
+        }
         return;
     }
 }
