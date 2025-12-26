@@ -12,17 +12,25 @@
 #include <sys/stat.h>
 
 static volatile int keep_running = 1;
-char *history_file = NULL;
 
 void int_handler(int dummy) { keep_running = 0; }
 
 int main(int argc, char *argv[]) {
-    history_file = strdup("/tmp/history");
     create_autocomplete_cache();
     rl_attempted_completion_function = input_completion;
     using_history();
     stifle_history(1000);
-    read_history(history_file);
+    char *history_file;
+    if (getenv("HISTFILE") != NULL) {
+        history_file = strdup(getenv("HISTFILE"));
+        if (history_file) {
+            if (read_history(history_file) != 0)
+                printf("Error writing history file");
+        }
+    } else {
+        if (read_history("/tmp/history") != 0)
+                printf("Error writing history file");
+    }
     signal(SIGINT, int_handler);
     while (keep_running) {
         setbuf(stdout, NULL);

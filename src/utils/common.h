@@ -18,6 +18,4 @@ typedef struct {
     CommandArgs **cmds;
 } Pipeline;
 
-extern char* history_file;
-
 #endif
