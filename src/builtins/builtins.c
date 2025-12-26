@@ -57,6 +57,7 @@ void exit_shell(CommandArgs *cmd) {
         code = atoi(cmd->argv[1]);
     }
     exit(code);
+    write_history(history_file);
 }
 
 void echo(CommandArgs *cmd) {

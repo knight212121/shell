@@ -1,5 +1,4 @@
 #include "autocomplete/autocomplete.h"
-#include "builtins/history.h"
 #include "executor/executor.h"
 #include "input/input.h"
 #include "utils/common.h"
@@ -14,6 +13,8 @@
 static volatile int keep_running = 1;
 
 void int_handler(int dummy) { keep_running = 0; }
+
+char *history_file = NULL;
 
 int main(int argc, char *argv[]) {
     create_autocomplete_cache();
