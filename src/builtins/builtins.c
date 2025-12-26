@@ -137,6 +137,16 @@ void shell_history(CommandArgs *cmd) {
     if (cmd->argc == 1) {
         print_history(-1);
         return;
+    } 
+    if (cmd->argc == 2) {
+        for(int i = 0; i < strlen(cmd->argv[1]); i += 1) {
+            if (!(cmd->argv[1][i] >= '0' && cmd->argv[1][i] <= '9')) {
+                printf("history: %s: numeric argument required\n", cmd->argv[1]);
+                return;
+            }
+        }
+        print_history(atoi(cmd->argv[1]));
+        return;
     }
     if (cmd->argc == 3 && strcmp(cmd->argv[1], "-r") == 0) {
         if (read_history(cmd->argv[2]) != 0)
