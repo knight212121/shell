@@ -161,6 +161,12 @@ void shell_history(CommandArgs *cmd) {
             printf("Error writing file");
         return;
     }
+
+    if (cmd->argc == 3 && strcmp(cmd->argv[1], "-a") == 0) {
+        if (append_history(history_length, cmd->argv[2]) != 0)
+            printf("Error writing file");
+        return;
+    }
 }
 
 ShellCommand commands[] = {
