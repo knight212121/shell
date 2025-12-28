@@ -38,13 +38,16 @@ int main(int argc, char *argv[]) {
         if (*input)
             add_history(input);
 
-        Pipeline *pipes = tokenize_input(input);
+        Sequence *sequence = tokenize_input(input);
 
-        if (pipes != NULL) {
-            execute_command(pipes);
-            free_command_args(pipes);
+        if (sequence != NULL) {
+            for (int i = 0; i < sequence->count; i += 1) {
+                Pipeline *pipe = sequence->pipelines[i];
+                execute_command(pipe);
+            }
         }
 
+        free_command_args(sequence);
         free(input);
     }
     write_history(history_file);

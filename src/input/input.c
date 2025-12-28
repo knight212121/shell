@@ -1,4 +1,5 @@
 #include "input.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -137,8 +138,8 @@ char **make_tokens(const char *input) {
     return tokens;
 }
 
-Pipeline *tokenize_input(char *input) {
-    int len = 20, argv_cap = 20, cmds_cap = 20;
+Sequence *tokenize_input(char *input) {
+    int len = 20, argv_cap = 20, cmds_cap = 20, sequence_cap = 20;
     if (!input || *input == '\0')
         return NULL;
 
@@ -183,6 +184,20 @@ Pipeline *tokenize_input(char *input) {
     }
     p->count = 0;
 
+    Sequence *s = malloc(sizeof(Sequence));
+    if (!s) {
+        for (int i = 0; tokens[i] != NULL; i += 1)
+            free(tokens[i]);
+        return NULL;
+    }
+    s->pipelines = malloc(sizeof(Pipeline *) * sequence_cap);
+    if (!s->pipelines) {
+        for (int i = 0; tokens[i] != NULL; i += 1)
+            free(tokens[i]);
+        return NULL;
+    }
+    s->count = 0;
+
     for (int iterator = 0; tokens[iterator] != NULL; iterator += 1) {
         if ((strcmp(">", tokens[iterator]) == 0) ||
             (strcmp("1>", tokens[iterator]) == 0)) {
@@ -222,14 +237,16 @@ Pipeline *tokenize_input(char *input) {
                 return NULL;
             }
             iterator += 1;
-        } else if (strcmp("|", tokens[iterator]) == 0) {
-            char **temp = realloc(cmd->argv, sizeof(char *) * (cmd->argc + 1));
-            if (!temp) {
+        } else if ((strcmp(";", tokens[iterator]) == 0) ||
+                   (strcmp("|", tokens[iterator]) == 0)) {
+            char **cmd_temp =
+                realloc(cmd->argv, sizeof(char *) * (cmd->argc + 1));
+            if (!cmd_temp) {
                 for (int i = 0; tokens[i] != NULL; i += 1)
                     free(tokens[i]);
                 return NULL;
             }
-            cmd->argv = temp;
+            cmd->argv = cmd_temp;
             cmd->argv[cmd->argc] = NULL;
             if (p->count >= cmds_cap) {
                 cmds_cap *= 2;
@@ -243,6 +260,7 @@ Pipeline *tokenize_input(char *input) {
                 p->cmds = temp;
             }
             p->cmds[p->count++] = cmd;
+            p->cmds[p->count] = NULL;
 
             cmd = malloc(sizeof(CommandArgs));
             if (!cmd) {
@@ -251,6 +269,7 @@ Pipeline *tokenize_input(char *input) {
                 return NULL;
             }
 
+            argv_cap = 20;
             cmd->argv = malloc(sizeof(char *) * argv_cap);
             if (!cmd->argv) {
                 for (int i = 0; tokens[i] != NULL; i += 1)
@@ -262,7 +281,39 @@ Pipeline *tokenize_input(char *input) {
             cmd->stdout_append = 0;
             cmd->stderr_append = 0;
             cmd->argc = 0;
-            argv_cap = 20;
+
+            if (strcmp(";", tokens[iterator]) == 0) {
+                if (s->count >= sequence_cap) {
+                    sequence_cap *= 2;
+                    Pipeline **temp =
+                        realloc(s->pipelines, sizeof(Pipeline *) * sequence_cap);
+                    if (!temp) {
+                        for (int i = 0; tokens[i] != NULL; i += 1)
+                            free(tokens[i]);
+                        return NULL;
+                    }
+                    s->pipelines = temp;
+                }
+                s->pipelines[s->count++] = p;
+                s->pipelines[s->count] = NULL;
+
+                p = malloc(sizeof(Pipeline));
+                if (!p) {
+                    for (int i = 0; tokens[i] != NULL; i += 1)
+                        free(tokens[i]);
+                    return NULL;
+                }
+                cmds_cap = 20;
+                p->cmds = malloc(sizeof(CommandArgs *) * cmds_cap);
+                if (!p->cmds) {
+                    for (int i = 0; tokens[i] != NULL; i += 1)
+                        free(tokens[i]);
+                    for (int i = 0; p->cmds[i] != NULL; i += 1)
+                        free(p->cmds[i]);
+                    return NULL;
+                }
+                p->count = 0;
+            }
         } else {
             if (cmd->argc >= argv_cap) {
                 argv_cap *= 2;
@@ -285,26 +336,39 @@ Pipeline *tokenize_input(char *input) {
             }
         }
     }
-    char **tmp = realloc(cmd->argv, sizeof(char *) * (cmd->argc + 1));
-    if (!tmp) {
+    char **argv_temp = realloc(cmd->argv, sizeof(char *) * (cmd->argc + 1));
+    if (!argv_temp) {
         for (int i = 0; tokens[i] != NULL; i += 1)
             free(tokens[i]);
         return NULL;
     }
-    cmd->argv = tmp;
+    cmd->argv = argv_temp;
     cmd->argv[cmd->argc] = NULL;
 
     p->cmds[p->count++] = cmd;
 
-    CommandArgs **temp =
+    CommandArgs **cmds_temp =
         realloc(p->cmds, sizeof(CommandArgs *) * (p->count + 1));
-    if (!temp) {
+    if (!cmds_temp) {
         for (int i = 0; tokens[i] != NULL; i += 1)
             free(tokens[i]);
         return NULL;
     }
-    p->cmds = temp;
+    p->cmds = cmds_temp;
     p->cmds[p->count] = NULL;
+
+    Pipeline **pipe_temp =
+        realloc(s->pipelines, sizeof(Pipeline *) * (p->count + 1));
+    if (!pipe_temp) {
+        for (int i = 0; tokens[i] != NULL; i += 1)
+            free(tokens[i]);
+        for (int i = 0; p->cmds[i] != NULL; i += 1)
+            free(p->cmds[i]);
+        return NULL;
+    }
+    s->pipelines = pipe_temp;
+    s->pipelines[s->count++] = p;
+    s->pipelines[s->count] = NULL;
 
     for (int i = 0; tokens[i] != NULL; i += 1) {
         free(tokens[i]);
@@ -312,23 +376,28 @@ Pipeline *tokenize_input(char *input) {
 
     free(tokens);
 
-    return p;
+    return s;
 }
 
-void free_command_args(Pipeline *pipes) {
-    if (!pipes)
+void free_command_args(Sequence *sequence) {
+    if (!sequence)
         return;
 
-    for (int i = 0; i < pipes->count; i += 1) {
-        CommandArgs *cmd = pipes->cmds[i];
-        for (int j = 0; j < cmd->argc; j += 1) {
-            free(cmd->argv[j]);
+    for (int i = 0; i < sequence->count; i += 1) {
+        Pipeline *pipes = sequence->pipelines[i];
+        for (int i = 0; i < pipes->count; i += 1) {
+            CommandArgs *cmd = pipes->cmds[i];
+            for (int j = 0; j < cmd->argc; j += 1) {
+                free(cmd->argv[j]);
+            }
+            free(cmd->argv);
+            free(cmd->stderr_file);
+            free(cmd->stdout_file);
+            free(cmd);
         }
-        free(cmd->argv);
-        free(cmd->stderr_file);
-        free(cmd->stdout_file);
-        free(cmd);
+        free(pipes->cmds);
+        free(pipes);
     }
-    free(pipes->cmds);
-    free(pipes);
+    free(sequence);
+    free(history_file);
 }

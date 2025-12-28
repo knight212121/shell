@@ -18,6 +18,11 @@ typedef struct {
     CommandArgs **cmds;
 } Pipeline;
 
+typedef struct {
+    int count;
+    Pipeline **pipelines;
+} Sequence;
+
 extern char *history_file;
 
 #endif
