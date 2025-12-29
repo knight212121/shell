@@ -43,7 +43,8 @@ int main(int argc, char *argv[]) {
         if (sequence != NULL) {
             for (int i = 0; i < sequence->count; i += 1) {
                 Pipeline *pipe = sequence->pipelines[i];
-                execute_command(pipe);
+                if (pipe -> count > 0)
+                    execute_command(pipe);
             }
         }
 

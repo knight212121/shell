@@ -1,5 +1,4 @@
 #include "input.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -239,80 +238,82 @@ Sequence *tokenize_input(char *input) {
             iterator += 1;
         } else if ((strcmp(";", tokens[iterator]) == 0) ||
                    (strcmp("|", tokens[iterator]) == 0)) {
-            char **cmd_temp =
-                realloc(cmd->argv, sizeof(char *) * (cmd->argc + 1));
-            if (!cmd_temp) {
-                for (int i = 0; tokens[i] != NULL; i += 1)
-                    free(tokens[i]);
-                return NULL;
-            }
-            cmd->argv = cmd_temp;
-            cmd->argv[cmd->argc] = NULL;
-            if (p->count >= cmds_cap) {
-                cmds_cap *= 2;
-                CommandArgs **temp =
-                    realloc(p->cmds, sizeof(CommandArgs *) * cmds_cap);
-                if (!temp) {
+            if (cmd->argc > 0) {
+                char **cmd_temp =
+                    realloc(cmd->argv, sizeof(char *) * (cmd->argc + 1));
+                if (!cmd_temp) {
                     for (int i = 0; tokens[i] != NULL; i += 1)
                         free(tokens[i]);
                     return NULL;
                 }
-                p->cmds = temp;
-            }
-            p->cmds[p->count++] = cmd;
-            p->cmds[p->count] = NULL;
-
-            cmd = malloc(sizeof(CommandArgs));
-            if (!cmd) {
-                for (int i = 0; tokens[i] != NULL; i += 1)
-                    free(tokens[i]);
-                return NULL;
-            }
-
-            argv_cap = 20;
-            cmd->argv = malloc(sizeof(char *) * argv_cap);
-            if (!cmd->argv) {
-                for (int i = 0; tokens[i] != NULL; i += 1)
-                    free(tokens[i]);
-                return NULL;
-            }
-            cmd->stdout_file = NULL;
-            cmd->stderr_file = NULL;
-            cmd->stdout_append = 0;
-            cmd->stderr_append = 0;
-            cmd->argc = 0;
-
-            if (strcmp(";", tokens[iterator]) == 0) {
-                if (s->count >= sequence_cap) {
-                    sequence_cap *= 2;
-                    Pipeline **temp =
-                        realloc(s->pipelines, sizeof(Pipeline *) * sequence_cap);
+                cmd->argv = cmd_temp;
+                cmd->argv[cmd->argc] = NULL;
+                if (p->count >= cmds_cap) {
+                    cmds_cap *= 2;
+                    CommandArgs **temp =
+                        realloc(p->cmds, sizeof(CommandArgs *) * cmds_cap);
                     if (!temp) {
                         for (int i = 0; tokens[i] != NULL; i += 1)
                             free(tokens[i]);
                         return NULL;
                     }
-                    s->pipelines = temp;
+                    p->cmds = temp;
                 }
-                s->pipelines[s->count++] = p;
-                s->pipelines[s->count] = NULL;
+                p->cmds[p->count++] = cmd;
+                p->cmds[p->count] = NULL;
 
-                p = malloc(sizeof(Pipeline));
-                if (!p) {
+                cmd = malloc(sizeof(CommandArgs));
+                if (!cmd) {
                     for (int i = 0; tokens[i] != NULL; i += 1)
                         free(tokens[i]);
                     return NULL;
                 }
-                cmds_cap = 20;
-                p->cmds = malloc(sizeof(CommandArgs *) * cmds_cap);
-                if (!p->cmds) {
+
+                argv_cap = 20;
+                cmd->argv = malloc(sizeof(char *) * argv_cap);
+                if (!cmd->argv) {
                     for (int i = 0; tokens[i] != NULL; i += 1)
                         free(tokens[i]);
-                    for (int i = 0; p->cmds[i] != NULL; i += 1)
-                        free(p->cmds[i]);
                     return NULL;
                 }
-                p->count = 0;
+                cmd->stdout_file = NULL;
+                cmd->stderr_file = NULL;
+                cmd->stdout_append = 0;
+                cmd->stderr_append = 0;
+                cmd->argc = 0;
+
+                if (strcmp(";", tokens[iterator]) == 0) {
+                    if (s->count >= sequence_cap) {
+                        sequence_cap *= 2;
+                        Pipeline **temp = realloc(
+                            s->pipelines, sizeof(Pipeline *) * sequence_cap);
+                        if (!temp) {
+                            for (int i = 0; tokens[i] != NULL; i += 1)
+                                free(tokens[i]);
+                            return NULL;
+                        }
+                        s->pipelines = temp;
+                    }
+                    s->pipelines[s->count++] = p;
+                    s->pipelines[s->count] = NULL;
+
+                    p = malloc(sizeof(Pipeline));
+                    if (!p) {
+                        for (int i = 0; tokens[i] != NULL; i += 1)
+                            free(tokens[i]);
+                        return NULL;
+                    }
+                    cmds_cap = 20;
+                    p->cmds = malloc(sizeof(CommandArgs *) * cmds_cap);
+                    if (!p->cmds) {
+                        for (int i = 0; tokens[i] != NULL; i += 1)
+                            free(tokens[i]);
+                        for (int i = 0; p->cmds[i] != NULL; i += 1)
+                            free(p->cmds[i]);
+                        return NULL;
+                    }
+                    p->count = 0;
+                }
             }
         } else {
             if (cmd->argc >= argv_cap) {
