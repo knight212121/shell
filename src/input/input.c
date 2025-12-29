@@ -1,4 +1,5 @@
 #include "input.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -400,5 +401,4 @@ void free_command_args(Sequence *sequence) {
         free(pipes);
     }
     free(sequence);
-    free(history_file);
 }

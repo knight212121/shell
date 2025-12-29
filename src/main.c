@@ -52,5 +52,6 @@ int main(int argc, char *argv[]) {
         free(input);
     }
     write_history(history_file);
+    free(history_file);
     exit(0);
 }
